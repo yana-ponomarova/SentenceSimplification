@@ -1,0 +1,11 @@
+Project: SentenceSimplification
+Author: Yana Ponomarova 
+Creation Date: 19/01/2016
+Last updated: 19/01/2016 by Yana Ponomarova
+
+Objective: Simplify complex sentences by separating the sentence clauses into separate simple sentences.
+
+This code uses Stanford NLP Parser and therefore, inherits its license limitations. 
+It was motivated by L. Del Corro and R. Gemulla approach
+(https://people.mpi-inf.mpg.de/~rgemulla/publications/delcorro13clausie.pdf)
+but uses the newest version of Stanford NLP at the time of developpement (3.5.2).
