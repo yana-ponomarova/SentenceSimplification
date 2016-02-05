@@ -31,6 +31,7 @@ public abstract class PropositionGenerator {
         EXCLUDE_RELATIONS.add(UniversalEnglishGrammaticalRelations.RELATIVE_CLAUSE_MODIFIER);
         EXCLUDE_RELATIONS.add(UniversalEnglishGrammaticalRelations.APPOSITIONAL_MODIFIER);
         EXCLUDE_RELATIONS.add(UniversalEnglishGrammaticalRelations.PARATAXIS);
+        EXCLUDE_RELATIONS.add(UniversalEnglishGrammaticalRelations.CLAUSAL_COMPLEMENT);
 
         EXCLUDE_RELATIONS_VERB = new HashSet<GrammaticalRelation>();
         EXCLUDE_RELATIONS_VERB.addAll(EXCLUDE_RELATIONS);
@@ -64,7 +65,8 @@ public abstract class PropositionGenerator {
             if (SentenseSimplification.options.lemmatize) {
                 result.append(word.lemma());
             } else {
-                result.append(word.originalText());
+            //    result.append(word.originalText());
+                result.append(word.value());
             }
             separator = " ";
         }

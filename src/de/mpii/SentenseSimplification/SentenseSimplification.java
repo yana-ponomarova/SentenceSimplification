@@ -188,9 +188,13 @@ public class SentenseSimplification {
 				// if(xcomp && clause.subject == i) continue; //An xcomp does
 				// not have an internal subject so should not be processed here
 				Constituent constituent = clause.constituents.get(i);
+				//constituent.rootString() = constituent.rootString().replaceFirst("be ", "");
+				//Constituent constituent =  (new TextConstituent(clause.constituents.get(i).rootString().replaceFirst("be ", ""),
+				//		Constituent.Type.VERB));
+
 				List<Constituent> alternatives;
 				if (!(xcomp && clause.subject == i)
-						&& constituent instanceof IndexedConstituent
+					//	&& constituent instanceof IndexedConstituent
 						// the processing of the xcomps is done in Default
 						// proposition generator.
 						// Otherwise we get duplicate propositions.

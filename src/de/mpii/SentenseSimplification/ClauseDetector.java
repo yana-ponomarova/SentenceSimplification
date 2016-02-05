@@ -150,7 +150,7 @@ class ClauseDetector {
                                        List<Clause> clauses, IndexedWord subject, IndexedWord clauseRoot, boolean partmod) {
         SemanticGraph semanticGraph = new SemanticGraph(SentenseSimplification.semanticGraph);
         Options options = SentenseSimplification.options;
-
+        boolean ccomp_ = false;
         List<SemanticGraphEdge> toRemove = new ArrayList<SemanticGraphEdge>();
         //to store the heads of the clauses according to the CCs options
         List<IndexedWord> ccs = ProcessConjunctions.getIndexedWordsConj(semanticGraph,
@@ -164,6 +164,7 @@ class ClauseDetector {
             IndexedWord root = ccs.get(i);
             List<SemanticGraphEdge> outgoingEdges = semanticGraph.getOutEdgesSorted(root);
             List<SemanticGraphEdge> incomingEdges = semanticGraph.getIncomingEdgesSorted(root);
+
 
             // initialize clause
             Clause clause = new Clause();
@@ -203,22 +204,75 @@ class ClauseDetector {
 
                 clause.verb = clause.constituents.size();
                 if (!partmod) {
-                    clause.constituents.add(new IndexedConstituent(semanticGraph, cop
-                            .getDependent(), include, Collections.<IndexedWord> emptySet(),
-                            Constituent.Type.VERB));
+              //  /*
+                    ccomp_ = false;
+                    for ( SemanticGraphEdge edge : incomingEdges) {
+                        if ((edge.getRelation().equals(UniversalEnglishGrammaticalRelations.CLAUSAL_COMPLEMENT))
+                                && (edge.getSource().tag().startsWith("V"))) {
+                            ccomp_ = true;
+                        }
+                    }
+            //    */
+            //     /*
+                  if (ccomp_) {
+                        /*constRoot = new TextConstituent("be " + clauseRoot.word(),
+                                Constituent.Type.VERB);
+                                */
+                      root.setValue("be " + root.word());
+                      clause.constituents.add(new IndexedConstituent(semanticGraph, cop
+                              .getDependent(), include, Collections.<IndexedWord>emptySet(),
+                              Constituent.Type.VERB));
+                    } else {
+            //          */
+                        clause.constituents.add(new IndexedConstituent(semanticGraph, cop.getDependent(), include, Collections.<IndexedWord>emptySet(),
+                                Constituent.Type.VERB));
+                    }
+
                 } else {
-                    clause.constituents.add(new TextConstituent("be " + clauseRoot.word(),
+                    /*clause.constituents.add(new TextConstituent("be " + clauseRoot.word(),
+                            Constituent.Type.VERB));
+                            */
+                    root.setValue("be " + root.word());
+                    clause.constituents.add(new IndexedConstituent(semanticGraph, cop
+                            .getDependent(), include, Collections.<IndexedWord>emptySet(),
                             Constituent.Type.VERB));
                 }
+
+
 
             } else {
                 clause.verb = clause.constituents.size();
                 if (!partmod) {
-                    constRoot = new IndexedConstituent(semanticGraph, root,
-                            Collections.<IndexedWord> emptySet(), exclude, Constituent.Type.VERB);
+             //   /*
+                    ccomp_ = false;
+                    for ( SemanticGraphEdge edge : incomingEdges) {
+                        if ((edge.getRelation().equals(UniversalEnglishGrammaticalRelations.CLAUSAL_COMPLEMENT))
+                                && (edge.getSource().tag().startsWith("V"))) {
+                            ccomp_ = true;
+                        }
+                    }
+
+                    if (ccomp_) {
+                    /*
+                        constRoot = new TextConstituent("be " + clauseRoot.word(),
+                                Constituent.Type.VERB);
+                                */
+                        root.setValue("be " + root.word());
+                        constRoot = new IndexedConstituent(semanticGraph, root,
+                                Collections.<IndexedWord>emptySet(), exclude, Constituent.Type.VERB);
+
+                    } else {
+                 //       */
+                        constRoot = new IndexedConstituent(semanticGraph, root,
+                                Collections.<IndexedWord>emptySet(), exclude, Constituent.Type.VERB);
+                    }
                 } else {
-                    constRoot = new TextConstituent("be " + clauseRoot.word(),
+                    /*constRoot = new TextConstituent("be " + clauseRoot.word(),
                             Constituent.Type.VERB);
+                            */
+                    root.setValue("be " + root.word());
+                    constRoot = new IndexedConstituent(semanticGraph, root,
+                            Collections.<IndexedWord>emptySet(), exclude, Constituent.Type.VERB);
                 }
 
                 clause.constituents.add(constRoot);
@@ -250,7 +304,7 @@ class ClauseDetector {
                         Constituent.Type.SUBJECT));
 
             //If the clause comes from a partmod construction exclude necesary vertex
-            if (partmod) {
+            if (partmod | ccomp_) {
                 ((IndexedConstituent) clause.constituents.get(clause.subject)).excludedVertexes
                         .add(clauseRoot);
                 // He is the man crying the whole day.
@@ -312,9 +366,16 @@ class ClauseDetector {
                                 Constituent.Type.DOBJ));
                     //CCOMPS
                 } else if (DpUtils.isCcomp(outgoingEdge)) {
-                    clause.ccomps.add(clause.constituents.size());
-                    clause.constituents.add(new IndexedConstituent(semanticGraph, dependent,
-                            Constituent.Type.CCOMP));
+                    if (outgoingEdge.getTarget().tag().startsWith("V")) {
+                        IndexedWord obj_bis = semanticGraph.getChildWithReln(outgoingEdge.getTarget(), UniversalEnglishGrammaticalRelations.NOMINAL_SUBJECT);
+                        clause.dobjects.add(clause.constituents.size());
+                        clause.constituents.add(new IndexedConstituent(semanticGraph, obj_bis,
+                                Type.DOBJ));
+                    } else {
+                        clause.ccomps.add(clause.constituents.size());
+                        clause.constituents.add(new IndexedConstituent(semanticGraph, dependent,
+                                Constituent.Type.CCOMP));
+                    }
                     //XCOMPS (Note: Need special treatment, they won't form a new clause so optional/obligatory constituents
                     // are managed within the context of its parent clause)
                 } else if (DpUtils.isXcomp(outgoingEdge)) {
@@ -437,7 +498,7 @@ class ClauseDetector {
 
             //Detect type and mantain clause lists
             roots.add(root);
-            if (!partmod) {
+            if ((!partmod) & (! ccomp_)) {
                 clause.detectType(options);
             } else {
                 clause.type = Clause.Type.SVA;
