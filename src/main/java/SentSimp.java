@@ -25,44 +25,50 @@ public class SentSimp {
     	System.out.print("sentence? ");
 
         while (input.hasNextLine()) {
-        	String sentence = input.nextLine();
+            String sentence = input.nextLine();
         	
             System.out.println("Input sentence   : " + sentence);
             if ("QUIT".equals(sentence)) break;
             
             // parse tree
             System.out.print("Parse time       : ");
-            long start = System.currentTimeMillis();
-            ss.parse(sentence);
-            long end = System.currentTimeMillis();
-            System.out.println((end - start) / 1000. + "s");
-            System.out.print("Dependency parse : ");
-            System.out.println(ss.getDepTree().pennString()
-                    .replaceAll("\n", "\n                   ").trim());
-            System.out.print("Semantic graph   : ");
-            System.out.println(ss.getSemanticGraph().toFormattedString()
-                    .replaceAll("\n", "\n                   ").trim());
+            try {
+		long start = System.currentTimeMillis();
+		ss.parse(sentence);
+		long end = System.currentTimeMillis();
+		System.out.println((end - start) / 1000. + "s");
+		System.out.print("Dependency parse : ");
+		System.out.println(ss.getDepTree().pennString()
+			.replaceAll("\n", "\n                   ").trim());
+		System.out.print("Semantic graph   : ");
+		System.out.println(ss.getSemanticGraph().toFormattedString()
+			.replaceAll("\n", "\n                   ").trim());
 
-            // clause detection
-            System.out.print("SentenseSimplification time     : ");
-            start = System.currentTimeMillis();
-            ss.detectClauses();
-            ss.generatePropositions();
-            end = System.currentTimeMillis();
-            System.out.println((end - start) / 1000. + "s");
-            System.out.print("Clauses          : ");
-            String sep = "";
-            for (Clause clause : ss.getClauses()) {
-                System.out.println(sep + clause.toString(ss.getOptions()));
-                sep = "                   ";
-            }
+		// clause detection
+		System.out.print("SentenseSimplification time     : ");
+		start = System.currentTimeMillis();
+		ss.detectClauses();
+		ss.generatePropositions();
+		end = System.currentTimeMillis();
+		System.out.println((end - start) / 1000. + "s");
+		System.out.print("Clauses          : ");
+		String sep = "";
+		for (Clause clause : ss.getClauses()) {
+		    System.out.println(sep + clause.toString(ss.getOptions()));
+		    sep = "                   ";
+		}
 
-            // generate propositions
-            System.out.print("Propositions     : ");
-            sep = "";
-            for (Proposition prop : ss.getPropositions()) {
-                System.out.println(sep + prop.toString());
-                sep = "                   ";
+		// generate propositions
+		System.out.print("Propositions     : ");
+		sep = "";
+		for (Proposition prop : ss.getPropositions()) {
+		    System.out.println(sep + prop.toString());
+		    sep = "                   ";
+		}
+            } catch (Exception e) {
+              System.err.println("\n"+e);
+    	      System.out.print("\nsentence? ");
+              continue;
             }
             System.out.println();
             System.out.print("sentence? ");
